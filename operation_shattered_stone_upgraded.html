@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Operation: Shattered Stone</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700;900&family=Cinzel:wght@600;800&display=swap');
+
+    :root{
+      --green:#00ff41;
+      --green2:#7dff9d;
+      --dark:#031006;
+      --ink:#061806;
+      --gold:#ffb000;
+      --red:#ff2020;
+      --ok:#44ffaa;
+      --paper:#d8c79b;
+      --dim:#3a7a3a;
+      --dimmer:#1e4a1e;
+      --border:rgba(0,255,65,.22);
+      --panel:rgba(2,15,5,.78);
+    }
+
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{min-height:100%}
+    body{
+      font-family:'Share Tech Mono',monospace;
+      color:var(--green);
+      background:
+        radial-gradient(circle at 14% 12%, rgba(0,255,65,.16), transparent 28%),
+        radial-gradient(circle at 86% 22%, rgba(255,176,0,.10), transparent 25%),
+        radial-gradient(circle at 50% 105%, rgba(0,120,40,.20), transparent 38%),
+        linear-gradient(135deg,#020802,#000 52%,#051305);
+      overflow-x:hidden;
+    }
+
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.08}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes shake{0%,100%{transform:translateX(0)}25%,75%{transform:translateX(-10px)}50%{transform:translateX(10px)}}
+    @keyframes popIn{0%{transform:scale(.35);opacity:0}65%{transform:scale(1.14)}100%{transform:scale(1);opacity:1}}
+    @keyframes defused{0%{letter-spacing:.05em;opacity:0;filter:blur(12px)}100%{letter-spacing:.35em;opacity:1;filter:blur(0)}}
+    @keyframes titleGlow{0%,100%{text-shadow:0 0 12px rgba(0,255,65,.35),0 0 38px rgba(0,255,65,.14)}50%{text-shadow:0 0 32px rgba(0,255,65,.9),0 0 72px rgba(0,255,65,.33),0 0 120px rgba(255,176,0,.12)}}
+    @keyframes pageTurn{0%{transform:rotateY(0);opacity:.15}50%{opacity:.55}100%{transform:rotateY(-180deg);opacity:.08}}
+    @keyframes lanternFlicker{0%,100%{opacity:.42;transform:scale(1)}20%{opacity:.65}42%{opacity:.35;transform:scale(1.02)}63%{opacity:.75}82%{opacity:.46}}
+    @keyframes revealSweep{from{transform:translateX(-120%)}to{transform:translateX(130%)}}
+    @keyframes dustFloat{from{transform:translateY(105vh);opacity:0}15%{opacity:.45}to{transform:translateY(-20vh);opacity:0}}
+    @keyframes mirrorShine{0%{transform:translateX(-140%) skewX(-24deg)}100%{transform:translateX(260%) skewX(-24deg)}}
+    @keyframes stampHit{0%{transform:scale(2.4) rotate(-9deg);opacity:0}45%{opacity:.85}70%{transform:scale(.92) rotate(-2deg)}100%{transform:scale(1) rotate(-3deg);opacity:.22}}
+    @keyframes redWarning{0%,100%{box-shadow:inset 0 0 0 rgba(255,32,32,0)}50%{box-shadow:inset 0 0 140px rgba(255,32,32,.25)}}
+    @keyframes candlePulse{0%,100%{filter:drop-shadow(0 0 8px rgba(255,176,0,.25))}50%{filter:drop-shadow(0 0 24px rgba(255,176,0,.7))}}
+
+    .root{
+      min-height:100vh;
+      position:relative;
+      isolation:isolate;
+      padding:26px 16px 60px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      background:
+        linear-gradient(90deg, rgba(0,255,65,.020) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(0,255,65,.016) 1px, transparent 1px),
+        radial-gradient(ellipse at 50% 24%, rgba(0,255,65,.12), transparent 50%);
+      background-size:56px 56px,56px 56px,auto;
+    }
+    .root::before{
+      content:"";
+      position:fixed;inset:0;z-index:90;pointer-events:none;
+      background:
+        repeating-linear-gradient(0deg, rgba(0,255,65,.032) 0 1px, transparent 1px 5px),
+        radial-gradient(ellipse at center, transparent 48%, rgba(0,0,0,.72) 100%);
+      mix-blend-mode:screen;
+    }
+    .root.critical{animation:redWarning .8s infinite}
+
+    .dust{
+      position:fixed;
+      bottom:-30px;
+      width:3px;height:3px;
+      border-radius:50%;
+      background:rgba(255,220,130,.65);
+      pointer-events:none;
+      z-index:1;
+      animation:dustFloat linear infinite;
+    }
+
+    .panel{
+      position:relative;
+      border:1px solid var(--border);
+      border-radius:24px;
+      overflow:hidden;
+      background:
+        linear-gradient(135deg, rgba(0,255,65,.08), transparent 42%),
+        linear-gradient(180deg, rgba(4,20,6,.90), rgba(1,7,2,.82));
+      box-shadow:
+        0 24px 80px rgba(0,0,0,.42),
+        0 0 36px rgba(0,255,65,.08),
+        inset 0 0 0 1px rgba(255,255,255,.025);
+      backdrop-filter:blur(9px);
+    }
+    .panel::before{
+      content:"";
+      position:absolute;inset:0;
+      pointer-events:none;
+      background:
+        linear-gradient(90deg,var(--green) 0 42px,transparent 42px calc(100% - 42px),var(--green) calc(100% - 42px)),
+        linear-gradient(90deg,var(--green) 0 42px,transparent 42px calc(100% - 42px),var(--green) calc(100% - 42px));
+      background-size:100% 2px;
+      background-repeat:no-repeat;
+      background-position:top,bottom;
+      opacity:.42;
+    }
+
+    .stage{width:100%;max-width:940px;position:relative;z-index:2}
+    .title-card{max-width:840px;margin:34px auto 0;padding:30px 26px 28px;text-align:center}
+    .op-label{font-size:9px;letter-spacing:5px;color:var(--dimmer)}
+    .big-title{
+      font-family:'Cinzel',serif;
+      font-size:clamp(31px,7vw,66px);
+      font-weight:800;
+      color:var(--green);
+      letter-spacing:.11em;
+      animation:titleGlow 3s ease infinite;
+    }
+    .subtitle{font-size:9px;letter-spacing:5px;color:var(--dim);margin-top:10px}
+
+    .archive-scene{
+      margin:22px auto 18px;
+      width:min(390px,100%);
+      min-height:150px;
+      display:grid;
+      grid-template-columns:1fr 110px 1fr;
+      gap:14px;
+      align-items:center;
+    }
+    .book-stack,.cipher-wheel,.mirror-icon{
+      height:140px;
+      border-radius:20px;
+      border:1px solid rgba(0,255,65,.18);
+      background:rgba(0,0,0,.24);
+      position:relative;
+      overflow:hidden;
+      display:grid;
+      place-items:center;
+    }
+    .book-stack::before{
+      content:"";
+      width:86px;height:96px;
+      border-radius:6px 12px 12px 6px;
+      background:
+        linear-gradient(90deg,rgba(255,176,0,.32) 0 10px,rgba(0,255,65,.12) 10px),
+        linear-gradient(180deg,rgba(255,255,255,.08),transparent);
+      border:1px solid rgba(255,176,0,.45);
+      box-shadow:-12px 10px 0 rgba(0,255,65,.10), -24px 20px 0 rgba(255,176,0,.08);
+      animation:candlePulse 2.8s infinite;
+    }
+    .book-stack::after{
+      content:"CLASSIFIED";
+      position:absolute;
+      font-family:'Orbitron',sans-serif;
+      font-size:10px;
+      letter-spacing:2px;
+      color:#ffb000;
+      opacity:.22;
+      border:2px solid #ffb000;
+      padding:5px 8px;
+      transform:rotate(-12deg);
+      animation:stampHit 2.8s ease infinite;
+    }
+
+    .cipher-wheel::before,.cipher-wheel::after{
+      content:"";
+      position:absolute;
+      border-radius:50%;
+      border:1px dashed rgba(0,255,65,.55);
+      inset:18px;
+    }
+    .cipher-wheel::before{animation:pageTurn 4.4s ease-in-out infinite}
+    .cipher-wheel::after{inset:34px;border-color:rgba(255,176,0,.45);animation:pageTurn 5.4s ease-in-out infinite reverse}
+    .cipher-core{
+      width:48px;height:48px;border-radius:50%;
+      border:1px solid rgba(255,176,0,.55);
+      display:grid;place-items:center;
+      color:var(--gold);
+      font-family:'Orbitron',sans-serif;
+      box-shadow:0 0 24px rgba(255,176,0,.16);
+    }
+
+    .mirror-icon::before{
+      content:"";
+      width:72px;height:104px;
+      border-radius:50% 50% 42% 42%;
+      border:1px solid rgba(0,255,65,.48);
+      background:linear-gradient(135deg,rgba(255,255,255,.20),rgba(0,255,65,.07),rgba(0,0,0,.20));
+      box-shadow:0 0 26px rgba(0,255,65,.12);
+    }
+    .mirror-icon::after{
+      content:"";
+      position:absolute;top:16px;bottom:16px;width:30px;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);
+      animation:mirrorShine 2.8s ease-in-out infinite;
+    }
+
+    .typed-box{
+      margin-top:18px;
+      padding:22px 24px;
+      min-height:92px;
+      text-align:left;
+      border-radius:18px;
+      border:1px solid rgba(0,255,65,.20);
+      background:rgba(0,0,0,.27);
+      color:#a8ffb8;
+      font-size:14px;
+      line-height:1.9;
+      position:relative;
+      overflow:hidden;
+    }
+    .typed-box::after{
+      content:"";
+      position:absolute;inset:0 auto 0 0;
+      width:45%;
+      background:linear-gradient(90deg,transparent,rgba(0,255,65,.08),transparent);
+      animation:revealSweep 3.2s ease-in-out infinite;
+    }
+
+    .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px}
+    .stat{
+      padding:14px;border-radius:16px;
+      border:1px solid rgba(0,255,65,.18);
+      background:linear-gradient(180deg,rgba(0,255,65,.07),rgba(0,0,0,.18));
+      text-align:left;
+    }
+    .stat small{display:block;color:var(--dimmer);font-size:9px;letter-spacing:3px}
+    .stat strong{display:block;margin-top:7px;color:var(--green2);font-size:13px}
+    .warning-box{
+      margin-top:18px;padding:16px 18px;border-radius:18px;
+      border:1px solid rgba(255,176,0,.28);
+      background:linear-gradient(135deg,rgba(255,176,0,.10),rgba(0,255,65,.04));
+      text-align:left;
+    }
+    .warning-box small{color:var(--gold);letter-spacing:4px;font-size:9px}
+    .warning-box p{color:#9a8128;font-size:12px;line-height:1.8;margin-top:7px}
+
+    button{
+      position:relative;overflow:hidden;border-radius:14px;background:transparent;
+      font-family:inherit;cursor:pointer;
+      transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background .18s ease;
+    }
+    button:hover{transform:translateY(-1px)}
+    button::after{
+      content:"";position:absolute;top:0;left:0;width:36%;height:100%;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);
+      transform:translateX(-140%) skewX(-22deg);
+      pointer-events:none;
+    }
+    button:hover::after{animation:mirrorShine .75s ease}
+    .button-row{display:flex;gap:12px;margin-top:20px}
+    .btn-primary{
+      flex:2;padding:17px 18px;border:1px solid rgba(0,255,65,.58);
+      color:#caffd3;background:linear-gradient(135deg,rgba(0,255,65,.16),rgba(255,176,0,.07));
+      box-shadow:0 0 30px rgba(0,255,65,.14);
+      font-family:'Orbitron',sans-serif;font-size:13px;font-weight:900;letter-spacing:3px;
+    }
+    .btn-primary:hover{background:linear-gradient(135deg,rgba(0,255,65,.25),rgba(255,176,0,.12));box-shadow:0 0 45px rgba(0,255,65,.24)}
+    .btn-secondary{
+      flex:1;padding:17px 18px;border:1px solid var(--border);
+      color:var(--dim);background:rgba(0,0,0,.12);font-size:11px;letter-spacing:2px;
+    }
+    .btn-secondary:hover{color:var(--green2);border-color:rgba(0,255,65,.45)}
+
+    .topbar{
+      width:100%;max-width:940px;
+      display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;
+      margin-bottom:18px;padding:16px 18px;
+    }
+    .op-name{
+      font-family:'Cinzel',serif;font-size:16px;font-weight:800;color:var(--green);
+      letter-spacing:3px;margin-top:4px;text-shadow:0 0 20px rgba(0,255,65,.35);
+    }
+    .timer-wrap{text-align:center;min-width:210px}
+    .timer-label{font-size:9px;letter-spacing:4px;color:var(--dim);margin-bottom:4px}
+    .timer{
+      font-family:'Orbitron',sans-serif;font-size:clamp(30px,6vw,52px);font-weight:900;
+      color:var(--green);letter-spacing:.06em;text-shadow:0 0 18px rgba(0,255,65,.55);
+    }
+    .timer.critical{color:var(--red);animation:blink .65s infinite;text-shadow:0 0 28px rgba(255,32,32,.8)}
+    .print-btn-wrap{text-align:right}
+
+    .progress-wrap{width:100%;max-width:940px;display:flex;align-items:center;gap:12px;margin-bottom:18px}
+    .progress-bars{display:flex;gap:8px;flex:1}
+    .bar{flex:1;height:9px;border-radius:999px;background:rgba(0,255,65,.09);border:1px solid rgba(0,255,65,.12)}
+    .bar.done,.bar.current{background:linear-gradient(90deg,var(--green),var(--green2));box-shadow:0 0 16px rgba(0,255,65,.38)}
+    .bar.current{background:linear-gradient(90deg,var(--gold),var(--green));opacity:.92}
+    .progress-count{color:var(--dim);font-size:10px;letter-spacing:2px}
+
+    .dashboard{width:100%;max-width:940px;display:grid;grid-template-columns:minmax(0,1fr) 180px;gap:16px;margin-bottom:18px}
+    .code-panel{padding:18px 18px 20px;text-align:center}
+    .section-label{color:var(--dimmer);font-size:9px;letter-spacing:4px;margin-bottom:13px}
+    .code-slots{display:flex;justify-content:center;gap:12px}
+    .slot{
+      width:clamp(48px,10vw,68px);height:clamp(56px,11vw,78px);
+      border-radius:16px;border:1px solid rgba(0,255,65,.16);background:rgba(0,0,0,.22);
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Orbitron',sans-serif;color:rgba(0,255,65,.26);
+      font-size:9px;letter-spacing:1px;box-shadow:inset 0 0 20px rgba(0,0,0,.25);
+    }
+    .slot.revealed{
+      color:#caffd3;font-size:clamp(20px,4vw,30px);font-weight:900;
+      border-color:rgba(0,255,65,.60);background:linear-gradient(180deg,rgba(0,255,65,.20),rgba(255,176,0,.06));
+      box-shadow:0 0 26px rgba(0,255,65,.22),inset 0 0 20px rgba(0,255,65,.06);
+    }
+    .slot.current{border-color:rgba(255,176,0,.45);color:rgba(255,176,0,.46)}
+
+    .archive-side{
+      padding:16px;display:flex;flex-direction:column;gap:10px;justify-content:center;text-align:center;
+    }
+    .archive-card{
+      border:1px solid rgba(255,176,0,.22);border-radius:14px;padding:10px;background:rgba(0,0,0,.20);
+      color:var(--gold);font-size:9px;letter-spacing:2px;line-height:1.5;
+    }
+    .candle{
+      margin:0 auto;width:28px;height:58px;border-radius:8px 8px 4px 4px;
+      background:linear-gradient(180deg,#ffdf8a,#9a5a00);
+      position:relative;animation:candlePulse 1.8s infinite;
+    }
+    .candle::before{
+      content:"";position:absolute;left:7px;top:-22px;width:14px;height:25px;border-radius:50% 50% 45% 45%;
+      background:radial-gradient(circle,#fff7bf 0 18%,#ffb000 42%,transparent 72%);
+      animation:lanternFlicker .55s infinite;
+    }
+
+    .puzzle-card{width:100%;max-width:940px;padding:22px;margin-bottom:16px}
+    .puzzle-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;border-bottom:1px solid rgba(0,255,65,.16);padding-bottom:15px;margin-bottom:16px}
+    .module-meta{color:var(--dimmer);font-size:9px;letter-spacing:4px;margin-bottom:7px}
+    .module-title{
+      color:#caffd3;font-size:clamp(20px,4.5vw,32px);letter-spacing:3px;
+      font-family:'Orbitron',sans-serif;text-shadow:0 0 22px rgba(0,255,65,.28);
+    }
+    .category{
+      padding:7px 12px;border-radius:999px;border:1px solid rgba(255,176,0,.30);
+      color:var(--gold);background:rgba(255,176,0,.055);font-size:9px;letter-spacing:2px;white-space:nowrap;
+    }
+    .briefing{color:#4da865;font-size:13px;line-height:1.75;font-style:italic;margin-bottom:18px}
+    .classified{
+      border:1px solid rgba(0,255,65,.18);border-radius:18px;padding:18px 20px;
+      background:
+        linear-gradient(90deg,rgba(0,255,65,.035) 1px,transparent 1px),
+        linear-gradient(0deg,rgba(0,255,65,.025) 1px,transparent 1px),
+        rgba(1,8,2,.50);
+      background-size:28px 28px;
+      box-shadow:inset 0 0 30px rgba(0,0,0,.30);
+    }
+    .line{font-size:13px;line-height:2.05;white-space:pre-wrap;color:#4da865}
+    .line.data{color:#7dff9d;text-shadow:0 0 12px rgba(0,255,65,.12)}
+    .line.head{color:var(--gold);letter-spacing:1px}
+    .hint-box{
+      margin-top:14px;padding:14px 16px;border-radius:16px;border:1px solid rgba(255,176,0,.30);
+      background:rgba(255,176,0,.045);color:var(--gold);font-size:12px;line-height:1.7;
+    }
+    .hint-box span{font-size:9px;letter-spacing:3px;color:#ffd16d}
+
+    .input-row{width:100%;max-width:940px;display:flex;gap:10px;align-items:stretch;margin-bottom:14px}
+    .answer-label{font-size:11px;letter-spacing:1px;color:var(--dim);display:flex;align-items:center;white-space:nowrap}
+    input{
+      flex:1;min-width:0;padding:13px 15px;border-radius:14px;border:1px solid rgba(0,255,65,.38);
+      background:rgba(0,0,0,.28);color:#caffd3;outline:none;font-size:15px;caret-color:var(--gold);
+      box-shadow:inset 0 0 20px rgba(0,0,0,.25);
+    }
+    input:focus{border-color:rgba(255,176,0,.55);box-shadow:0 0 20px rgba(255,176,0,.10),inset 0 0 20px rgba(0,0,0,.25)}
+    .confirm,.hintbtn{
+      padding:0 20px;border:1px solid rgba(0,255,65,.28);color:var(--green2);
+      background:rgba(0,255,65,.06);font-size:11px;letter-spacing:3px;white-space:nowrap;
+    }
+    .confirm{
+      font-family:'Orbitron',sans-serif;font-weight:900;color:#caffd3;border-color:rgba(0,255,65,.45);
+      background:linear-gradient(135deg,rgba(0,255,65,.16),rgba(255,176,0,.07));
+    }
+    .hintbtn{color:var(--gold)}
+    .status{font-size:11px;letter-spacing:3px;text-align:center;margin-top:2px}
+    .status.ok{color:var(--ok)}
+    .status.err{color:var(--red)}
+    .shake{animation:shake .45s ease}
+    .fade-up{animation:fadeUp .35s ease}
+    .pop-in{animation:popIn .4s ease both}
+
+    .page-overlay{
+      position:fixed;inset:0;z-index:240;pointer-events:none;opacity:0;
+      background:
+        linear-gradient(90deg,transparent,rgba(216,199,155,.18),transparent),
+        radial-gradient(circle,rgba(255,176,0,.18),transparent 55%);
+    }
+    .page-overlay.active{animation:lockFlash .8s ease}
+    @keyframes lockFlash{0%{opacity:0}12%{opacity:.78}100%{opacity:0}}
+
+    .seal-overlay{
+      position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-10deg);
+      z-index:245;pointer-events:none;opacity:0;
+      border:4px solid var(--red);color:var(--red);
+      padding:18px 24px;border-radius:8px;
+      font-family:'Orbitron',sans-serif;font-size:clamp(24px,6vw,54px);font-weight:900;letter-spacing:.12em;
+      text-shadow:0 0 22px rgba(255,32,32,.55);
+      box-shadow:0 0 34px rgba(255,32,32,.18), inset 0 0 24px rgba(255,32,32,.12);
+    }
+    .seal-overlay.active{animation:stampHit .95s ease}
+
+    .sound-toggle{
+      position:fixed;right:16px;bottom:16px;z-index:300;
+      padding:10px 14px;border:1px solid rgba(0,255,65,.36);color:var(--green2);
+      background:rgba(0,0,0,.48);font-size:10px;letter-spacing:2px;backdrop-filter:blur(8px);
+    }
+
+    .end-screen{justify-content:center;text-align:center;background:radial-gradient(circle at 50% 28%,rgba(0,255,65,.12),transparent 34%),#020802}
+    .end-card{width:min(560px,100%);padding:34px 26px}
+    .end-title{font-family:'Orbitron',sans-serif;font-size:clamp(32px,7vw,58px);font-weight:900;letter-spacing:.2em;margin-bottom:14px}
+
+    @media(max-width:820px){
+      .topbar{grid-template-columns:1fr;text-align:center}.print-btn-wrap{text-align:center}
+      .stat-grid{grid-template-columns:1fr 1fr}.button-row,.input-row{flex-direction:column}
+      .answer-label{justify-content:center}.puzzle-head{flex-direction:column;align-items:stretch}
+      .category{align-self:flex-start}.dashboard{grid-template-columns:1fr}.archive-side{display:none}
+      .archive-scene{grid-template-columns:1fr}.book-stack,.mirror-icon{display:none}
+    }
+
+    @media print{
+      body{background:#fff!important}.no-print,.sound-toggle,.page-overlay,.seal-overlay{display:none!important}
+      .pw{padding:20px;color:#000;font-family:'Courier New',monospace}.pt{font-size:20px;font-weight:bold;text-align:center;letter-spacing:4px;border-bottom:3px solid #000;padding-bottom:10px;margin-bottom:6px}
+      .ps{font-size:10px;text-align:center;color:#666;letter-spacing:3px;margin-bottom:18px}.pm{border:1px solid #000;padding:14px 16px;margin-bottom:13px;page-break-inside:avoid}
+      .pmh{font-weight:bold;font-size:12px;letter-spacing:2px;border-bottom:1px dashed #ccc;padding-bottom:6px;margin-bottom:9px;display:flex;justify-content:space-between}
+      .pmc{font-weight:normal;font-size:10px;color:#666}.pb{font-size:10px;color:#555;font-style:italic;margin-bottom:8px}.pl{font-size:11px;line-height:1.9;white-space:pre-wrap}
+      .pa{margin-top:12px;border-top:1px solid #ddd;padding-top:9px;font-size:11px}.pbox{display:inline-block;min-width:130px;height:24px;border-bottom:2px solid #000;margin-left:8px}
+      .pcode{border:2px solid #000;padding:14px;text-align:center;margin-top:16px}.pcl{font-weight:bold;font-size:14px;letter-spacing:4px;margin-bottom:12px}
+      .pcsl{display:flex;justify-content:center;gap:8px}.pcs{width:46px;height:46px;border:2px solid #000;display:flex;align-items:center;justify-content:center;font-size:9px}
+      .pfoot{margin-top:12px;font-size:9px;color:#aaa;text-align:center}
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app"></div>
+  <div id="pageOverlay" class="page-overlay"></div>
+  <div id="sealOverlay" class="seal-overlay">CLASSIFIED</div>
+  <button id="soundToggle" class="sound-toggle no-print">SOUND: OFF</button>
+
+  <script>
+    const PUZZLES = [
+      {
+        id: 1,
+        codename: "THE SILENT WITNESS",
+        category: "FIELD RIDDLE",
+        briefing: "An agent was found dead, clutching a torn page. The only clue was this riddle — apparently the password to his safe.",
+        lines: [
+          "I have thousands of voices, yet I make no sound.",
+          "I have leaves, but I am not a tree.",
+          "I have a spine, but I have no bones.",
+          "I have a cover, yet I never go outside.",
+          "Kings have been overthrown because of me.",
+          "Worlds have been created inside me.",
+          "",
+          "What am I?",
+        ],
+        hint: "You are standing inside a building full of them right now.",
+        answer: "BOOK",
+        unlocks: 4,
+      },
+      {
+        id: 2,
+        codename: "SIGNAL INTERCEPT",
+        category: "MORSE CODE",
+        briefing: "A transmission was intercepted on a classified frequency. It was sent in Morse code. Decode it — the decoded word is your answer.",
+        lines: [
+          "INTERCEPTED SIGNAL:",
+          "",
+          "  ···  |  ····  |  ·−  |  −··  |  −−−  |  ·−−",
+          "",
+          "MORSE REFERENCE:",
+          "  · = E    − = T    ·· = I    −− = M    ··· = S",
+          "  −·· = D  −−− = O  ···· = H  ·−− = W   ·− = A",
+          "",
+          "Each block separated by  |  is one letter.",
+          "What word does the signal spell?",
+        ],
+        hint: "S=···  H=····  A=·−  D=−··  O=−−−  W=·−−",
+        answer: "SHADOW",
+        unlocks: 7,
+      },
+      {
+        id: 3,
+        codename: "THE INTERROGATION",
+        category: "LOGIC DEDUCTION",
+        briefing: "Three suspects were brought in for questioning. One of them stole the cipher key. Identify the thief.",
+        lines: [
+          "SUSPECTS:  Merchant  ·  Scholar  ·  Soldier",
+          "",
+          "STATEMENTS GIVEN UNDER INTERROGATION:",
+          "",
+          "  Merchant :  'I did not steal the cipher key.'",
+          "  Scholar  :  'The Merchant is telling the truth.'",
+          "  Soldier  :  'The Scholar is lying.'",
+          "",
+          "RULES:",
+          "  ▸ Exactly ONE suspect is guilty.",
+          "  ▸ The guilty suspect ALWAYS LIES.",
+          "  ▸ Innocent suspects ALWAYS TELL THE TRUTH.",
+          "",
+          "Who stole the cipher key? Enter their title.",
+        ],
+        hint: "Test each suspect as the guilty one. Only one scenario is consistent with all three statements simultaneously.",
+        answer: "SOLDIER",
+        unlocks: 2,
+      },
+      {
+        id: 4,
+        codename: "THE OTHER OPERATIVE",
+        category: "LATERAL THINKING",
+        briefing: "A field agent filed a report that was dismissed as impossible. Re-read it carefully — the answer is simpler than it seems.",
+        lines: [
+          "FIELD REPORT — AGENT DELTA — CLASSIFIED:",
+          "",
+          "  'I entered the safe room alone and encountered",
+          "   another operative. She wore identical clothing,",
+          "   made every movement I made at the same instant,",
+          "   and matched me perfectly in every detail.",
+          "",
+          "   She was never captured on security cameras.",
+          "   She left no footprints. She made no sound.",
+          "   When I reached out to apprehend her,",
+          "   my hand met only cold, flat resistance.",
+          "",
+          "   I was alone. And yet — she was there.'",
+          "",
+          "What did Agent Delta encounter?",
+        ],
+        hint: "She is always with you, always silent, and lives on walls.",
+        answer: "MIRROR",
+        unlocks: 9,
+      },
+      {
+        id: 5,
+        codename: "DEAD DROP MESSAGE",
+        category: "REVERSE CIPHER",
+        briefing: "A dead drop contained only a sequence of numbers. The enemy uses a reversed alphabet: Z=1, Y=2, X=3 … A=26. Decode it.",
+        lines: [
+          "REVERSED ALPHABET:",
+          "  Z=1  Y=2  X=3  W=4  V=5  U=6  T=7  S=8  R=9",
+          "  Q=10 P=11 O=12 N=13 M=14 L=15 K=16 J=17 I=18",
+          "  H=19 G=20 F=21 E=22 D=23 C=24 B=25 A=26",
+          "",
+          "INTERCEPTED CODE:",
+          "",
+          "  24  ·  18  ·  11  ·  19  ·  22  ·  9",
+          "",
+          "Decode each number to its letter.",
+          "What 6-letter word does it spell?",
+        ],
+        hint: "24=C  18=I  11=P  19=H  22=E  9=R — read them in order.",
+        answer: "CIPHER",
+        unlocks: 6,
+      },
+    ];
+
+    const TOTAL_TIME = 5 * 60;
+    const app = document.getElementById("app");
+    const pageOverlay = document.getElementById("pageOverlay");
+    const sealOverlay = document.getElementById("sealOverlay");
+    const soundToggle = document.getElementById("soundToggle");
+
+    let screen = "intro";
+    let puzzleIdx = 0;
+    let unlockedDigits = [];
+    let input = "";
+    let time = TOTAL_TIME;
+    let showHint = false;
+    let status = null;
+    let latestPop = -1;
+    let timerId = null;
+    let introTyped = 0;
+    let introTypingId = null;
+    let lastMinute = Math.floor(TOTAL_TIME / 60);
+    let soundEnabled = false;
+    let audioCtx = null;
+
+    const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2,"0")}:${String(s % 60).padStart(2,"0")}`;
+    const esc = (s) => String(s).replace(/[&<>'"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;" }[c]));
+
+    for (let i = 0; i < 26; i++) {
+      const d = document.createElement("div");
+      d.className = "dust";
+      d.style.left = Math.random() * 100 + "vw";
+      d.style.animationDuration = (8 + Math.random() * 12) + "s";
+      d.style.animationDelay = (-Math.random() * 12) + "s";
+      d.style.opacity = (0.15 + Math.random() * 0.45).toString();
+      document.body.appendChild(d);
+    }
+
+    soundToggle.onclick = () => {
+      soundEnabled = !soundEnabled;
+      soundToggle.textContent = soundEnabled ? "SOUND: ON" : "SOUND: OFF";
+      if (soundEnabled) {
+        ensureAudio();
+        tone(440,.07,"triangle",.035);
+        setTimeout(()=>tone(660,.07,"triangle",.03),90);
+      }
+    };
+
+    function ensureAudio(){
+      if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if(audioCtx.state === "suspended") audioCtx.resume();
+    }
+    function tone(freq,duration=.12,type="sine",volume=.04){
+      if(!soundEnabled) return;
+      ensureAudio();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(volume,audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+duration);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime+duration);
+    }
+
+    function pageFlash(sealText="CLASSIFIED"){
+      pageOverlay.classList.remove("active");
+      sealOverlay.classList.remove("active");
+      sealOverlay.textContent = sealText;
+      void pageOverlay.offsetWidth;
+      void sealOverlay.offsetWidth;
+      pageOverlay.classList.add("active");
+      sealOverlay.classList.add("active");
+      setTimeout(()=>{pageOverlay.classList.remove("active");sealOverlay.classList.remove("active");},1000);
+    }
+    function correctSound(){
+      tone(520,.06,"triangle",.035);
+      setTimeout(()=>tone(780,.08,"triangle",.032),80);
+      setTimeout(()=>tone(1040,.10,"triangle",.028),170);
+    }
+    function errorSound(){
+      tone(120,.18,"sawtooth",.045);
+      setTimeout(()=>tone(80,.16,"sawtooth",.04),120);
+    }
+
+    function lineClass(line){
+      if(!line) return "line";
+      if(line.startsWith("INTERCEPTED") || line.startsWith("MORSE") || line.startsWith("SUSPECTS") || line.startsWith("STATEMENTS") || line.startsWith("RULES") || line.startsWith("FIELD REPORT") || line.startsWith("REVERSED")) return "line head";
+      if(line.startsWith("  ") || line.includes("·") || line.includes("=") || line.includes("▸") || line.includes("|")) return "line data";
+      return "line";
+    }
+
+    function stopTimers(){ clearInterval(timerId); }
+
+    function startTimer(){
+      clearInterval(timerId);
+      lastMinute = Math.floor(time/60);
+      timerId = setInterval(()=>{
+        if(screen !== "game") return clearInterval(timerId);
+        time -= 1;
+
+        const minuteNow = Math.floor(time/60);
+        if(minuteNow < lastMinute && time > 0){
+          lastMinute = minuteNow;
+          pageFlash("TIME MARK");
+          tone(220,.08,"square",.03);
+          setTimeout(()=>tone(180,.08,"square",.026),120);
+        }
+
+        if(time <= 0){
+          screen = "failed";
+          renderFailed();
+        } else updateTimerOnly();
+      },1000);
+    }
+
+    function updateTimerOnly(){
+      const timer = document.getElementById("timer");
+      const root = document.querySelector(".root");
+      if(!timer) return;
+      const critical = time < 60;
+      timer.textContent = fmt(time);
+      timer.className = critical ? "timer critical" : "timer";
+      if(root) root.classList.toggle("critical", critical);
+    }
+
+    function renderIntro(){
+      const msg = "PRIORITY ONE TRANSMISSION. A DEVICE HAS BEEN ARMED. FIVE ENCRYPTED MODULES STAND BETWEEN YOU AND DETONATION. SOLVE THEM. FIND THE CODE. DISARM IT. CLOCK IS RUNNING.";
+      app.innerHTML = `
+        <main class="root">
+          <section class="stage title-card panel">
+            <div class="op-label">◈ OPERATION</div>
+            <div class="big-title">SHATTERED STONE</div>
+            <div class="subtitle">TOP SECRET · EYES ONLY ◈</div>
+
+            <div class="archive-scene">
+              <div class="book-stack"></div>
+              <div class="cipher-wheel"><div class="cipher-core">A/Z</div></div>
+              <div class="mirror-icon"></div>
+            </div>
+
+            <div class="typed-box">
+              <span>${esc(msg.slice(0,introTyped))}</span><span style="animation:blink 1s infinite;color:var(--green);">▋</span>
+            </div>
+
+            <div class="stat-grid">
+              ${[
+                ["⏱","TIME LIMIT","5:00 MINUTES"],
+                ["🔐","MODULES","5 · MAXIMUM DIFFICULTY"],
+                ["🔢","CODE LENGTH","5 DIGITS"],
+                ["✍","ANSWERS","WORDS — NOT NUMBERS"],
+              ].map(([ic,lb,vl])=>`
+                <div class="stat"><small>${ic} ${lb}</small><strong>${vl}</strong></div>
+              `).join("")}
+            </div>
+
+            <div class="warning-box">
+              <small>⚠ ARCHIVE PROTOCOL</small>
+              <p>This upgrade uses secret-library graphics: floating dust, coded book seals, mirror glare, cipher wheel, candle glow, and document-stamp flashes instead of the previous alarm/static/vault effects.</p>
+            </div>
+
+            <div class="button-row">
+              <button class="btn-primary" id="startBtn">⬛ BEGIN MISSION</button>
+              <button class="btn-secondary" id="printBtn">PRINT BRIEFING</button>
+            </div>
+          </section>
+        </main>
+      `;
+
+      document.getElementById("startBtn").onclick = ()=>{
+        tone(330,.08,"triangle",.035);
+        screen = "game";
+        renderGame();
+        startTimer();
+      };
+      document.getElementById("printBtn").onclick = renderPrint;
+
+      clearTimeout(introTypingId);
+      if(introTyped < msg.length && screen === "intro"){
+        introTypingId = setTimeout(()=>{introTyped += 1; renderIntro();},22);
+      }
+    }
+
+    function renderPrint(){
+      app.innerHTML = `
+        <div class="pw">
+          <div class="no-print" style="padding:12px 16px;background:#0d1a0d;color:#00ff41;font-family:monospace;margin-bottom:16px;display:flex;align-items:center;gap:16px;">
+            <span>⬛ Print dialog opening…</span>
+            <button id="backBtn" style="padding:5px 14px;background:transparent;border:1px solid #00ff41;color:#00ff41;cursor:pointer;font-family:monospace;">← BACK</button>
+          </div>
+          <div class="pt">OPERATION : SHATTERED STONE</div>
+          <div class="ps">CLASSIFIED FIELD BRIEFING · AGENT COPY · EYES ONLY</div>
+          <p class="pl" style="padding:10px;border:1px solid #ccc;margin-bottom:14px;color:#444;font-size:10px;">
+            MISSION: A device with an active detonation sequence is armed at the target site. Solve all 5 modules to retrieve the 5-digit disarm code.
+            Each module has a question — your answer is a word or name. Correct answers reveal one digit each. Collect all 5 and enter the code. You have 5 minutes.
+          </p>
+          ${PUZZLES.map(p=>`
+            <div class="pm">
+              <div class="pmh"><span>MODULE ${String(p.id).padStart(2,"0")} · ${esc(p.codename)}</span><span class="pmc">[${esc(p.category)}]</span></div>
+              <div class="pb">${esc(p.briefing)}</div>
+              ${p.lines.map(l=>`<div class="pl">${l ? esc(l) : "&nbsp;"}</div>`).join("")}
+              <div class="pa">ANSWER: <span class="pbox"></span></div>
+            </div>
+          `).join("")}
+          <div class="pcode"><div class="pcl">DISARM CODE</div><div class="pcsl">${[1,2,3,4,5].map(n=>`<div class="pcs">DIGIT<br>${n}</div>`).join("")}</div></div>
+          <div class="pfoot">OPERATION: SHATTERED STONE · TOP SECRET · DESTROY AFTER USE</div>
+        </div>
+      `;
+      document.getElementById("backBtn").onclick = ()=> screen === "game" ? renderGame() : renderIntro();
+      setTimeout(()=>window.print(),350);
+    }
+
+    function renderTopbar(){
+      const critical = time < 60;
+      return `
+        <header class="topbar panel">
+          <div>
+            <div class="op-label">◈ OPERATION</div>
+            <div class="op-name">SHATTERED STONE</div>
+          </div>
+          <div class="timer-wrap">
+            <div class="timer-label">TIME REMAINING</div>
+            <div id="timer" class="${critical ? "timer critical" : "timer"}">${fmt(time)}</div>
+          </div>
+          <div class="print-btn-wrap">
+            <button class="btn-secondary no-print" id="printGame" style="padding:10px 14px;display:inline-block;">PRINT</button>
+          </div>
+        </header>
+      `;
+    }
+
+    function renderProgress(){
+      return `
+        <section class="progress-wrap">
+          <div class="progress-bars">
+            ${PUZZLES.map((_,i)=>`<div class="bar ${i < unlockedDigits.length ? "done" : i === puzzleIdx ? "current" : ""}"></div>`).join("")}
+          </div>
+          <div class="progress-count">${unlockedDigits.length} / 5</div>
+        </section>
+      `;
+    }
+
+    function renderDashboard(){
+      return `
+        <section class="dashboard">
+          <div class="code-panel panel">
+            <div class="section-label">DISARM CODE — DIGITS UNLOCK AS YOU SOLVE EACH MODULE</div>
+            <div class="code-slots">
+              ${Array.from({length:5}).map((_,i)=>{
+                const revealed = i < unlockedDigits.length;
+                const isCurrent = i === unlockedDigits.length;
+                const isLatest = i === latestPop && revealed;
+                return `<div class="slot ${revealed ? "revealed" : ""} ${isCurrent ? "current" : ""} ${isLatest ? "pop-in" : ""}">${revealed ? unlockedDigits[i] : isCurrent ? "NEXT" : "—"}</div>`;
+              }).join("")}
+            </div>
+          </div>
+          <div class="archive-side panel">
+            <div class="candle"></div>
+            <div class="archive-card">ARCHIVE<br>CASE FILE<br>${String(puzzleIdx+1).padStart(2,"0")} / 05</div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderGame(){
+      const p = PUZZLES[puzzleIdx];
+      const critical = time < 60;
+      app.innerHTML = `
+        <main class="root ${critical ? "critical" : ""}">
+          ${renderTopbar()}
+          ${renderProgress()}
+          ${renderDashboard()}
+
+          <section class="puzzle-card panel ${status === "err" ? "shake" : "fade-up"}">
+            <div class="puzzle-head">
+              <div>
+                <div class="module-meta">MODULE ${String(p.id).padStart(2,"0")} OF 05</div>
+                <div class="module-title">${esc(p.codename)}</div>
+              </div>
+              <div class="category">${esc(p.category)}</div>
+            </div>
+
+            <div class="briefing">${esc(p.briefing)}</div>
+
+            <div class="classified">
+              ${p.lines.map(line=>`<div class="${lineClass(line)}">${line ? esc(line) : "&nbsp;"}</div>`).join("")}
+            </div>
+
+            ${showHint ? `<div class="hint-box"><span>HINT › </span>${esc(p.hint)}</div>` : ""}
+          </section>
+
+          <section class="input-row">
+            <span class="answer-label">ANSWER:</span>
+            <input id="answerInput" value="${esc(input)}" placeholder="type your answer here…" autocomplete="off"/>
+            <button id="confirmBtn" class="confirm" ${input.trim() ? "" : "disabled"}>CONFIRM</button>
+            <button id="hintBtn" class="hintbtn">${showHint ? "HIDE" : "HINT"}</button>
+          </section>
+
+          ${status === "ok" ? `<div class="status ok">✓ CORRECT — DIGIT ${p.unlocks} UNLOCKED</div>` : ""}
+          ${status === "err" ? `<div class="status err">✗ INCORRECT — TRY AGAIN</div>` : ""}
+        </main>
+      `;
+
+      document.getElementById("printGame").onclick = renderPrint;
+
+      const answerInput = document.getElementById("answerInput");
+      answerInput.focus();
+      answerInput.setSelectionRange(answerInput.value.length,answerInput.value.length);
+      answerInput.addEventListener("input",e=>{input = e.target.value});
+      answerInput.addEventListener("keydown",e=>{if(e.key === "Enter" && input.trim()) handleSubmit()});
+
+      document.getElementById("confirmBtn").onclick = handleSubmit;
+      document.getElementById("hintBtn").onclick = ()=>{
+        showHint = !showHint;
+        tone(400,.06,"triangle",.025);
+        if(showHint) pageFlash("HINT");
+        renderGame();
+      };
+    }
+
+    function handleSubmit(){
+      const val = input.trim().toUpperCase();
+      if(!val) return;
+      const p = PUZZLES[puzzleIdx];
+
+      if(val === p.answer){
+        correctSound();
+        unlockedDigits.push(p.unlocks);
+        latestPop = unlockedDigits.length - 1;
+        status = "ok";
+        pageFlash("APPROVED");
+        renderGame();
+
+        setTimeout(()=>{
+          status = null;
+          input = "";
+          showHint = false;
+          if(puzzleIdx + 1 >= PUZZLES.length){
+            screen = "success";
+            renderSuccess();
+          } else {
+            puzzleIdx += 1;
+            renderGame();
+          }
+        },1400);
+      } else {
+        errorSound();
+        status = "err";
+        pageFlash("DENIED");
+        renderGame();
+        setTimeout(()=>{
+          status = null;
+          input = "";
+          renderGame();
+        },1000);
+      }
+    }
+
+    function renderSuccess(){
+      stopTimers();
+      pageFlash("DEFUSED");
+      app.innerHTML = `
+        <main class="root end-screen">
+          <section class="end-card panel">
+            <div class="end-title" style="color:var(--ok);animation:defused 1.2s ease forwards;text-shadow:0 0 50px rgba(68,255,170,.8);">DEFUSED</div>
+            <div class="section-label" style="color:#2d8a5c;margin-bottom:30px;">DETONATION SEQUENCE TERMINATED</div>
+
+            <div class="code-panel panel" style="max-width:100%;border-color:rgba(68,255,170,.38);">
+              <div class="section-label" style="color:#2d8a5c;">DISARM CODE</div>
+              <div class="code-slots">
+                ${unlockedDigits.map((d,i)=>`<div class="slot revealed" style="color:var(--ok);border-color:rgba(68,255,170,.65);background:rgba(68,255,170,.08);animation:fadeUp .4s ease ${i*.12}s both;">${d}</div>`).join("")}
+              </div>
+            </div>
+
+            <div style="font-size:13px;color:#2d8a5c;line-height:1.9;margin-top:22px;">
+              Time remaining: <span style="color:var(--ok);">${fmt(time)}</span><br>
+              All 5 modules solved. Status: <span style="color:var(--ok);">MISSION ACCOMPLISHED</span>
+            </div>
+          </section>
+        </main>
+      `;
+    }
+
+    function renderFailed(){
+      stopTimers();
+      pageFlash("FAILED");
+      app.innerHTML = `
+        <main class="root end-screen critical">
+          <section class="end-card panel">
+            <div class="end-title" style="color:var(--red);text-shadow:0 0 50px rgba(255,32,32,.8);">DETONATED</div>
+            <div class="section-label" style="color:#8a3030;margin-bottom:30px;">TIME ELAPSED · MISSION FAILED</div>
+            <div style="font-size:13px;color:#8a3030;line-height:1.9;margin-bottom:32px;">
+              The device detonated before the disarm<br>code could be entered. Status: <span style="color:var(--red);">COMPROMISED</span>
+            </div>
+            <button class="btn-primary" id="retryBtn" style="display:inline-block;flex:none;padding:15px 32px;">RETRY MISSION</button>
+          </section>
+        </main>
+      `;
+      document.getElementById("retryBtn").onclick = ()=>window.location.reload();
+    }
+
+    renderIntro();
+  </script>
+</body>
+</html>
