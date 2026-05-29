@@ -72,7 +72,7 @@
         radial-gradient(ellipse at center, transparent 48%, rgba(0,0,0,.72) 100%);
       mix-blend-mode:screen;
     }
-    .root.critical{animation:redWarning .8s infinite}
+    .root.critical { animation: none !important; }
 
     .dust{
       position:fixed;
@@ -89,7 +89,7 @@
       position:relative;
       border:1px solid var(--border);
       border-radius:24px;
-      overflow:hidden;
+      overflow-x:hidden;
       background:
         linear-gradient(135deg, rgba(0,255,65,.08), transparent 42%),
         linear-gradient(180deg, rgba(4,20,6,.90), rgba(1,7,2,.82));
@@ -140,7 +140,7 @@
       border:1px solid rgba(0,255,65,.18);
       background:rgba(0,0,0,.24);
       position:relative;
-      overflow:hidden;
+      overflow-x:hidden;
       display:grid;
       place-items:center;
     }
@@ -214,7 +214,7 @@
       font-size:14px;
       line-height:1.9;
       position:relative;
-      overflow:hidden;
+      overflow-x:hidden;
     }
     .typed-box::after{
       content:"";
@@ -243,7 +243,7 @@
     .warning-box p{color:#9a8128;font-size:12px;line-height:1.8;margin-top:7px}
 
     button{
-      position:relative;overflow:hidden;border-radius:14px;background:transparent;
+      position:relative;overflow-x:hidden;border-radius:14px;background:transparent;
       font-family:inherit;cursor:pointer;
       transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease,background .18s ease;
     }
@@ -433,7 +433,184 @@
       .pcsl{display:flex;justify-content:center;gap:8px}.pcs{width:46px;height:46px;border:2px solid #000;display:flex;align-items:center;justify-content:center;font-size:9px}
       .pfoot{margin-top:12px;font-size:9px;color:#aaa;text-align:center}
     }
-  </style>
+  
+/* ─────────────────────────────────────────────
+   BOOTH-SAFE PATCH
+   Fixes:
+   - allows scrolling on smaller booth screens
+   - makes confirm / answer buttons easier to press
+   - removes startup flicker / heavy screen repaint effects
+   ───────────────────────────────────────────── */
+
+html, body {
+  min-height: 100% !important;
+  height: auto !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior-y: contain;
+}
+
+body {
+  animation: none !important;
+}
+
+.root {
+  min-height: 100svh !important;
+  height: auto !important;
+  overflow-x: hidden !important;
+  overflow-y: visible !important;
+  animation: none !important;
+}
+
+.root::before,
+.root::after {
+  animation: none !important;
+  pointer-events: none !important;
+}
+
+.stage,
+.panel,
+.hud-panel,
+.title-card,
+.topbar,
+.progress-wrap,
+.code-wrap,
+.puzzle-card,
+.input-wrap,
+.input-row,
+.answer-row,
+.button-row {
+  max-width: min(940px, calc(100vw - 18px)) !important;
+}
+
+.panel,
+.hud-panel,
+.title-card,
+.puzzle-card {
+  overflow: visible !important;
+}
+
+.fade-up {
+  animation: none !important;
+}
+
+button,
+input {
+  min-height: 48px !important;
+  touch-action: manipulation !important;
+  position: relative !important;
+  z-index: 5 !important;
+}
+
+button::after {
+  display: none !important;
+}
+
+input {
+  font-size: 16px !important;
+}
+
+.shake {
+  animation-duration: 0.22s !important;
+}
+
+.big-title,
+.badge,
+.difficulty,
+.timer.critical,
+.root.critical,
+.root.lockdown {
+  animation: none !important;
+}
+
+@media (max-width: 760px), (max-height: 720px) {
+  .root {
+    align-items: stretch !important;
+    padding: 12px 9px 34px !important;
+  }
+
+  .stage,
+  .topbar,
+  .progress-wrap,
+  .code-wrap,
+  .puzzle-card,
+  .input-wrap,
+  .input-row,
+  .answer-row {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .topbar {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+    text-align: center !important;
+    padding: 12px !important;
+  }
+
+  .print-btn-wrap {
+    text-align: center !important;
+  }
+
+  .timer-wrap {
+    min-width: 0 !important;
+  }
+
+  .stat-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .button-row,
+  .input-wrap,
+  .input-row,
+  .answer-row {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    align-items: stretch !important;
+  }
+
+  .button-row > *,
+  .input-wrap > *,
+  .input-row > *,
+  .answer-row > *,
+  input,
+  button {
+    width: 100% !important;
+    flex: none !important;
+  }
+
+  .puzzle-card,
+  .panel,
+  .hud-panel {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .typed-box {
+    font-size: 12px !important;
+    line-height: 1.65 !important;
+  }
+}
+
+@media (max-height: 620px) {
+  .title-card {
+    margin-top: 10px !important;
+    padding-top: 18px !important;
+    padding-bottom: 18px !important;
+  }
+
+  .big-title {
+    font-size: clamp(28px, 8vw, 52px) !important;
+  }
+
+  .typed-box,
+  .warning-box {
+    line-height: 1.55 !important;
+  }
+}
+
+</style>
 </head>
 
 <body>
@@ -958,5 +1135,21 @@
 
     renderIntro();
   </script>
+
+<script>
+/* Booth-safe runtime patch: keep the page scrollable and buttons tappable. */
+(function(){
+  function unlockScroll(){
+    document.documentElement.style.overflowY = "auto";
+    document.documentElement.style.height = "auto";
+    document.body.style.overflowY = "auto";
+    document.body.style.height = "auto";
+  }
+  unlockScroll();
+  window.addEventListener("load", unlockScroll);
+  window.addEventListener("resize", unlockScroll);
+})();
+</script>
+
 </body>
 </html>
